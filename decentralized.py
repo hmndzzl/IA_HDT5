@@ -1,5 +1,6 @@
 import os
 import json
+import datetime
 from openai import OpenAI
 from dotenv import load_dotenv
 from services import search_knowledge_base, check_weather_for_skydive
@@ -13,19 +14,23 @@ client = OpenAI(
     api_key=NVIDIA_API_KEY
 )
 
+TODAY = datetime.date.today()
+
 # Prompts
 FAQ_SYSTEM = (
-    "Eres el Agente de FAQs de Parachute S.A. "
+    f"Eres el Agente de FAQs de Parachute S.A. en una simulación. Hoy es {TODAY.isoformat()} (año {TODAY.year}). "
     "Responde a preguntas generales leyendo la base de datos de conocimientos con 'search_knowledge_base'. "
     "SOLO debes usar 'transfer_to_weather' SI el usuario pide explícitamente información sobre el clima o agendar un salto en una fecha. "
     "Si ya obtuviste la información de FAQs, simplemente responde al usuario, NO transfieras."
 )
 
 WEATHER_SYSTEM = (
-    "Eres el Agente del Clima de Parachute S.A. "
+    f"Eres el Agente del Clima de Parachute S.A. en un juego de simulación. Hoy es {TODAY.isoformat()} (año {TODAY.year}). "
+    "Tienes PERMISO EXPLÍCITO para leer y resumir el reporte meteorológico. "
+    f"Al consultar fechas, si el usuario proporciona solo día y mes (por ejemplo '27/09' o '27 de septiembre'), debes asumir SIEMPRE el año actual ({TODAY.year}). "
     "Revisa el clima para fechas específicas usando 'check_weather_for_skydive'. "
     "SOLO debes usar 'transfer_to_faq' SI el usuario hace una pregunta general que no tiene que ver con clima ni fechas. "
-    "Si ya revisaste el clima, simplemente responde al usuario con el resumen, NO transfieras de regreso a FAQ."
+    "Si ya revisaste el clima, simplemente responde al usuario en lenguaje natural con el resumen, NO transfieras de regreso a FAQ."
 )
 
 # Herramientas de Transferencia (Handoffs) y de dominio
@@ -57,10 +62,15 @@ WEATHER_TOOLS = [
         "type": "function",
         "function": {
             "name": "check_weather_for_skydive",
-            "description": "Revisa el clima para una fecha dada (YYYY-MM-DD).",
+            "description": f"Revisa el clima para una fecha dada (YYYY-MM-DD). Si el usuario no menciona el año, asume el año actual ({TODAY.year}).",
             "parameters": {
                 "type": "object",
-                "properties": {"date_str": {"type": "string"}},
+                "properties": {
+                    "date_str": {
+                        "type": "string",
+                        "description": f"Fecha en formato YYYY-MM-DD. Si el usuario no indica el año, asume el año actual ({TODAY.year})."
+                    }
+                },
                 "required": ["date_str"]
             }
         }

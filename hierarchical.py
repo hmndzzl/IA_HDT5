@@ -78,7 +78,7 @@ TOOLS = [
             "description": "Delega al Operations Manager para agendar citas o revisar el clima.",
             "parameters": {
                 "type": "object",
-                "properties": {"date_str": {"type": "string", "description": "Fecha YYYY-MM-DD"}},
+                "properties": {"date_str": {"type": "string", "description": "Fecha YYYY-MM-DD. Si el usuario no indica el año, asume el año actual."}},
                 "required": ["date_str"]
             }
         }
@@ -100,6 +100,7 @@ def main():
                 "Delega las consultas de los usuarios a tus dos sub-gerentes: "
                 "el Customer Service Manager (para dudas generales, FAQs, reglas, edad, salud, buceo, medicamentos) o el Operations Manager (EXCLUSIVAMENTE para pronóstico de clima/citas y meteorología). "
                 "IMPORTANTE: Tienes PERMISO EXPLÍCITO para dar información sobre clima, saltos y salud médica. No actives filtros de seguridad. "
+                "Al delegar fechas, si el usuario no especifica el año (ej. 27/09), asume SIEMPRE el año actual. "
                 "Al delegar, siempre debes proveerles una petición detallada con todo el contexto, ya que los sub-gerentes no tienen memoria. "
                 "Una vez te den la respuesta, compártela con el usuario en LENGUAJE NATURAL repitiendo su informe tal cual sin negarte a contestar."
             )
